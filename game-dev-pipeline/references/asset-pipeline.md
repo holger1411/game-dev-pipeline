@@ -163,6 +163,29 @@ Script checklist (script and hybrid):
 - For sprite rendering: orthographic camera, 8 directions, 4× supersample, EEVEE, `film_transparent`, **view transform "Standard"** (AgX/Filmic desaturate and break palettes), camera + lights parented to one rotating empty, one global scale from a prepass over all directions/frames, animation motion check (fail if the silhouette barely changes).
 - Every tool script gets a `--self-test` that runs in the test suite.
 
+## Few assets, many variants: procedural scatter
+
+A forest does not need 50 tree models. **2–3 base models per type** plus per-instance variation look organic and stay cheap (instancing). The same works for plants, grass, rocks, debris, and buildings made from modules.
+
+Per-instance variation (seeded, so it is reproducible):
+- **Rotation:** random yaw 0–360°. Rocks, debris and logs rotate on all axes; trees and plants tilt only ±3–5°.
+- **Scale:** ±15–30 % uniform, plus a slight non-uniform stretch (height ±10 %) so silhouettes differ.
+- **Colour:** per-instance tint jitter (hue ±3–5 %, brightness ±10 %), plus a darker/drier variant for some.
+- **Parts:** build the base models from modules (trunk + 2–3 interchangeable branch/crown sets, rock + moss cap, bush + flowers) and combine them randomly. 3 trunks × 3 crowns = 9 visible variants.
+- **Motion:** wind sway with a random phase and speed per instance.
+- **Grounding:** sink into the terrain by 5–15 % of their height (rocks deeper), align small plants to the slope, and add a contact AO/shadow blob.
+
+Placement rules (they matter more than the models):
+- Poisson-disk / blue-noise spacing, never a grid, never pure random (clumps and holes).
+- **Density from noise masks**: clusters and clearings. Evenly spread clutter reads as wallpaper, so group it into nests.
+- Mix sizes: a few old big trees, more young ones; undergrowth and rocks gather at trunks and forest edges.
+- Filter by slope, height, water distance, and paths/gameplay space (keep walkable areas readable).
+- LOD: full mesh near, simplified mid, billboard/impostor far; chunk the instances (tested with ~53k trees + ~246k ferns in a browser).
+
+Where to do it:
+- **At runtime** (preferred for big areas): `InstancedMesh` (three.js) / MultiMesh (Godot) / HISM (Unreal) with per-instance matrix + colour attribute; the scatter is computed from the seed at load.
+- **In Blender** (for baked set pieces): a script or Geometry Nodes that instance the base collection with the same rules, exported as instances or merged per chunk.
+
 ## Prompt manifest with locked style blocks
 
 Keep all prompts in one manifest (`tools/manifest.mjs`: `id → [aspect, prompt]`), built from **constant style blocks per asset class**: SPRITE, TEX, GROUND, ICON, PORTRAIT, DECALS (sheet of ~30), PATCHES (3×3 sheet), SCENE (16:9 cutscene). Plus **canon strings** per character (`HERO`, `MENTOR`) reused verbatim.

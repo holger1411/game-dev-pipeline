@@ -42,7 +42,7 @@ Rounds continue until the user stops or the critic can't tell the frames apart. 
 |---|---|
 | **Lighting & values first** | One project went 2.5→3.5 mostly from values: low-key scene, key:fill ≈ 5:1, warm low sun + cool fill, fog colour = sky horizon, ACES tone mapping, correct exposure. Another: hemisphere + PMREM env + ACES was the biggest jump for almost no cost |
 | **Grounding** | Objects sinking into or floating above the ground was the most repeated fix: contact shadows, AO blobs, decals, snap to the ground |
-| **Population, not just light** | "Not badly lit but badly populated": cluster clutter into nests (not evenly spread wallpaper), put debris against hero props, spend randomness where it's visible and lit |
+| **Population, not just light** | "Not badly lit but badly populated": cluster clutter into nests (not evenly spread wallpaper), put debris against hero props, spend randomness where it's visible and lit  (see asset-pipeline.md → procedural scatter) |
 | **Readability hierarchy** | Walkable ground bright and desaturated, blockers dark; scenery muted, actors saturated; enemies never share a hue with hazards; the HUD is never washed out by bloom |
 | **One style** | Parallel streams created two asphalt materials and two tree styles: enforce singletons for shared materials/assets |
 | **One pixel grid** (2D) | All sprites at one art-pixel scale; mixed pixel sizes read as amateur immediately |
