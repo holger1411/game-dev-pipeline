@@ -48,8 +48,9 @@ ln -s ~/game-dev-pipeline-repo/game-dev-pipeline ~/.claude/skills/game-dev-pipel
 node game-dev-pipeline/board/board.mjs /path/to/your/game --open
 ```
 
-The board shows `moodboard/`, `story/` and `art/` as a canvas you can arrange freely:
+The board shows `moodboard/`, `story/`, `art/` and the game's `assets/` (inspiration next to real assets) as a canvas you can arrange freely:
 - images and video
+- 3D models (glb/gltf), with orbit controls and playable animations
 - audio players
 - colour swatches
 - Markdown that you can edit in place

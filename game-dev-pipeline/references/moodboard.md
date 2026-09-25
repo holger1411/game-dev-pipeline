@@ -73,12 +73,12 @@ The skill ships `board/board.mjs`, a zero-dependency local board (Node 18+). Sta
 node <skill-dir>/board/board.mjs . --port 4777 --open
 ```
 
-- Infinite canvas with lanes: **Story** (`story/*.md`), **Target shots** (`art/target/`), **Colours** (`colors*.txt`, `.gpl`, `.hex`, `palette.json`), **Images**, **Videos**, **Audio** (players), **Notes**, **Other**.
+- Infinite canvas with lanes: **Story** (`story/*.md`), **Target shots** (`art/target/`), **Colours** (`colors*.txt`, `.gpl`, `.hex`, `palette.json`), **Images**, **3D models** (`.glb`/`.gltf`: orbit, zoom, auto-rotate, embedded animations playable via a dropdown), **Videos**, **Audio** (players), **Notes**, and separate **Game assets** lanes (3D / 2D / audio) for the real files in `assets/` and `public/assets/`. That puts *possible* assets (moodboard) next to *actual* ones.
 - Drag cards by the header, resize at the corner, pan by dragging the background, zoom with pinch or cmd/ctrl + wheel, filter by name/type, double-click an image to enlarge it.
 - **Markdown is editable**: Edit/Save (Cmd+S) writes straight into the file. "+ Story" creates `story/<name>.md`, "+ Note" creates `moodboard/<name>.md`, "+ Colour" appends to `moodboard/colors.txt`.
 - Drop files from the desktop onto the board: they are copied into `moodboard/` (`.md` goes to `story/`).
 - It polls the disk every 3 s, so assets Claude generates appear live. The layout is stored in `moodboard/_board/layout.json` (commit it if the arrangement matters).
-- Serves only `moodboard/`, `story/`, `art/`, bound to 127.0.0.1.
+- Serves only `moodboard/`, `story/`, `art/`, `assets/`, `public/assets/` (change with `--dirs a,b,c`), bound to 127.0.0.1. The 3D viewer (`<model-viewer>`) loads from a CDN, so 3D cards need internet access.
 
 Claude reads the files, not the layout. If the user groups things on the board, ask them to mirror important groups as subfolders or notes.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Game board: a local, zero-dependency canvas for moodboard/, story/ and art/.
-// Shows images, videos, audio, colour palettes and editable Markdown story files.
-// Usage: node board.mjs [projectDir] [--port 4777] [--open]
+// Shows images, videos, audio, colour palettes, 3D models (glb/gltf) and editable Markdown story files.
+// Usage: node board.mjs [projectDir] [--port 4777] [--open] [--dirs moodboard,story,art,assets,public/assets]
 import http from 'node:http';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -10,10 +10,11 @@ import { spawn } from 'node:child_process';
 
 const args = process.argv.slice(2);
 const flag = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
-const positional = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1] === '--port'));
+const positional = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && ['--port', '--dirs'].includes(args[i - 1])));
 const ROOT = path.resolve(positional[0] ?? process.cwd());
 const PORT = Number(flag('--port') ?? process.env.BOARD_PORT ?? 4777);
-const DIRS = ['moodboard', 'story', 'art'];
+// Board roots: inspiration, story, art direction, and the game's real assets (if those folders exist).
+const DIRS = (flag('--dirs') ?? 'moodboard,story,art,assets,public/assets').split(',').map((d) => d.trim().replace(/\/+$/, '')).filter(Boolean);
 const BOARD_DIR = path.join(ROOT, 'moodboard', '_board');
 const LAYOUT = path.join(BOARD_DIR, 'layout.json');
 const SKIP = new Set(['_board', 'frames', '.git', 'node_modules', '.DS_Store']);
@@ -24,6 +25,7 @@ const TYPES = {
   audio: ['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.opus'],
   text: ['.md', '.txt', '.markdown'],
   palette: ['.gpl', '.hex'],
+  model: ['.glb', '.gltf'],
 };
 const MIME = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif',
@@ -31,7 +33,7 @@ const MIME = {
   '.mov': 'video/quicktime', '.m4v': 'video/mp4', '.ogv': 'video/ogg', '.mp3': 'audio/mpeg', '.wav': 'audio/wav',
   '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.m4a': 'audio/mp4', '.aac': 'audio/aac', '.opus': 'audio/opus',
   '.md': 'text/markdown; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.json': 'application/json',
-  '.pdf': 'application/pdf',
+  '.pdf': 'application/pdf', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.bin': 'application/octet-stream',
 };
 
 function typeOf(rel) {
@@ -46,8 +48,8 @@ function typeOf(rel) {
 // Resolve a client path inside ROOT/DIRS only; rejects traversal.
 function safe(rel) {
   const abs = path.resolve(ROOT, rel);
-  const top = path.relative(ROOT, abs).split(path.sep)[0];
-  if (!abs.startsWith(ROOT + path.sep) || !DIRS.includes(top)) throw new Error('forbidden path');
+  const r = path.relative(ROOT, abs).split(path.sep).join('/');
+  if (!abs.startsWith(ROOT + path.sep) || !DIRS.some((d) => r === d || r.startsWith(d + '/'))) throw new Error('forbidden path');
   return abs;
 }
 
@@ -64,7 +66,9 @@ async function walk(dir, out) {
 
 async function listItems() {
   const files = [];
-  for (const d of DIRS) await walk(path.join(ROOT, d), files);
+  // nested roots (assets + public/assets) must not be listed twice
+  const roots = DIRS.filter((d) => !DIRS.some((o) => o !== d && d.startsWith(o + '/')));
+  for (const d of roots) await walk(path.join(ROOT, d), files);
   const items = [];
   for (const abs of files) {
     const rel = path.relative(ROOT, abs).split(path.sep).join('/');
@@ -72,9 +76,13 @@ async function listItems() {
     if (rel.startsWith('moodboard/_digest/') && !/\.(md|json)$/i.test(rel)) continue;
     const type = typeOf(rel);
     if (rel.endsWith('.json') && type !== 'palette') continue;
+    if (rel.endsWith('.bin')) continue; // gltf side files
     const st = await fsp.stat(abs);
     const lane = rel.startsWith('story/') ? 'story' : rel.startsWith('art/target/') ? 'target' : type;
-    items.push({ path: rel, type, lane, size: st.size, mtime: st.mtimeMs });
+    // real game assets get their own lanes so "possible" (moodboard) and "actual" assets stay apart
+    const isAsset = /^(public\/)?assets\//.test(rel);
+    const assetLane = { model: 'asset-model', image: 'asset-image', audio: 'asset-audio' }[type];
+    items.push({ path: rel, type, lane: isAsset && assetLane ? assetLane : lane, size: st.size, mtime: st.mtimeMs });
   }
   items.sort((a, b) => a.path.localeCompare(b.path));
   return items;
@@ -202,7 +210,7 @@ const PAGE = String.raw`<!doctype html>
 button{white-space:nowrap;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;font:inherit}button:hover{border-color:var(--accent)}
 #view{position:absolute;inset:44px 0 0 0;overflow:hidden;cursor:grab;background-image:radial-gradient(var(--grid) 1px,transparent 1px);background-size:24px 24px}
 #view.panning{cursor:grabbing}#world{position:absolute;left:0;top:0;transform-origin:0 0}
-.lane{position:absolute;color:var(--muted);font-size:22px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;pointer-events:none}
+.lane{position:absolute;white-space:nowrap;color:var(--muted);font-size:22px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;pointer-events:none}
 .card{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;box-shadow:0 6px 20px #0006;overflow:hidden}
 .card.sel{border-color:var(--accent)}.card.dim{opacity:.18}
 .card header{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--card2);cursor:move;font-size:11px;color:var(--muted);white-space:nowrap}
@@ -231,7 +239,8 @@ textarea{width:100%;height:100%;border:0;resize:none;background:#1a1b20;color:va
 <script>
 const $=s=>document.querySelector(s), view=$('#view'), world=$('#world');
 const LANES=[['story','Story',1,460,520],['target','Target shots',2,420,260],['palette','Colours',1,300,220],['image','Images',4,260,220],
-  ['video','Videos',2,400,260],['audio','Audio',1,320,110],['text','Notes',1,380,360],['other','Other',1,260,120]];
+  ['model','3D models',2,360,320],['video','Videos',2,400,260],['audio','Audio',1,320,110],['text','Notes',1,380,360],
+  ['asset-model','Game assets: 3D',3,300,280],['asset-image','Game assets: 2D',5,180,180],['asset-audio','Game assets: audio',1,300,110],['other','Other',1,260,120]];
 let layout={view:{x:40,y:40,z:.6},cards:{}}, items=[], cards=new Map(), editing=new Set();
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',1800)}
@@ -296,6 +305,7 @@ function makeCard(it){
   const head=el.querySelector('header'), body=el.querySelector('.body'), url=fileUrl(it.path)+'?v='+it.mtime;
   if(it.type==='image'){body.innerHTML='<img loading="lazy" draggable="false" src="'+url+'">';body.firstChild.ondblclick=()=>{$('#lb img').src=url;$('#lb').style.display='flex'}}
   else if(it.type==='video')body.innerHTML='<video controls preload="metadata" src="'+url+'"></video>';
+  else if(it.type==='model')modelCard(it,head,body,url);
   else if(it.type==='audio')body.innerHTML='<div class="audio"><div class="name">🎵 '+esc(name.split('/').pop())+'</div><audio controls preload="none" src="'+url+'"></audio></div>';
   else if(it.type==='palette')api('/api/palette?path='+encodeURIComponent(it.path)).then(r=>r.json()).then(cs=>{body.innerHTML='<div class="sw">'+cs.map(k=>'<div style="background:'+k.hex+'" title="'+esc(k.name||k.hex)+'"><span>'+k.hex+(k.name?' '+esc(k.name):'')+'</span></div>').join('')+'</div>';
     body.querySelectorAll('.sw div').forEach((d,i)=>d.onclick=()=>{navigator.clipboard?.writeText(cs[i].hex);toast('copied '+cs[i].hex)})});
@@ -303,6 +313,21 @@ function makeCard(it){
   else body.innerHTML='<div class="other">📄 <a target="_blank" href="'+url+'">'+esc(name)+'</a><br><small>'+(it.size/1024).toFixed(0)+' KB</small></div>';
   head.addEventListener('pointerdown',drag(el,c,'move'));el.querySelector('.grip').addEventListener('pointerdown',drag(el,c,'size'));
   pos(el,c); world.appendChild(el); cards.set(it.path,{el,it}); return el;
+}
+// 3D: <model-viewer> (loaded once from CDN); orbit, zoom, auto-rotate, play embedded animations
+let mvLoaded=false;
+function modelCard(it,head,body,url){
+  if(!mvLoaded){mvLoaded=true;const s=document.createElement('script');s.type='module';s.src='https://cdn.jsdelivr.net/npm/@google/model-viewer@4/dist/model-viewer.min.js';document.head.appendChild(s)}
+  const mv=document.createElement('model-viewer');
+  for(const [k,v] of [['src',url],['camera-controls',''],['auto-rotate',''],['autoplay',''],['shadow-intensity','1'],['exposure','1'],['interaction-prompt','none'],['loading','lazy']])mv.setAttribute(k,v);
+  mv.style.cssText='width:100%;height:100%;background:#0c0c0e;--poster-color:#0c0c0e';
+  mv.addEventListener('wheel',e=>e.stopPropagation());mv.addEventListener('pointerdown',e=>e.stopPropagation());
+  body.appendChild(mv);
+  mv.addEventListener('load',()=>{const anims=mv.availableAnimations||[];if(!anims.length)return;
+    const sel=document.createElement('select');sel.style.cssText='background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:4px;font-size:11px;max-width:120px';
+    sel.innerHTML=anims.map(a=>'<option>'+esc(a)+'</option>').join('');sel.onchange=()=>{mv.animationName=sel.value;mv.play()};
+    sel.addEventListener('pointerdown',e=>e.stopPropagation());head.appendChild(sel);mv.animationName=anims[0];mv.play()});
+  mv.addEventListener('error',()=>{body.innerHTML='<div class="other">⚠️ could not load model</div>'});
 }
 function textCard(it,head,body){
   let text='', ed=false; const b=document.createElement('button'); b.textContent='Edit'; head.appendChild(b);
@@ -344,7 +369,7 @@ addEventListener('dragleave',()=>{if(--dc<=0){dc=0;$('#drop').style.display='non
 addEventListener('drop',async e=>{e.preventDefault();dc=0;$('#drop').style.display='none';const at=toWorld(e.clientX,e.clientY);let i=0;
   for(const f of e.dataTransfer.files){const dir=/\.(md|markdown)$/i.test(f.name)?'story':'moodboard';
     const j=await api('/api/upload/'+dir+'/'+encodeURIComponent(f.name),{method:'PUT',body:f}).then(r=>r.json());
-    const it={path:j.path,lane:'other'};const [, ,,w,h]=LANES.find(l=>l[0]===(dir==='story'?'story':/^image/.test(f.type)?'image':/^video/.test(f.type)?'video':/^audio/.test(f.type)?'audio':'other'));
+    const it={path:j.path,lane:'other'};const [, ,,w,h]=LANES.find(l=>l[0]===(dir==='story'?'story':/^image/.test(f.type)?'image':/^video/.test(f.type)?'video':/^audio/.test(f.type)?'audio':/\.(glb|gltf)$/i.test(f.name)?'model':'other'));
     layout.cards[j.path]={lane:'dropped',x:Math.round(at.x+i*30),y:Math.round(at.y+i*30),w,h};i++}
   toast(i+' file(s) added');saveLayout();refresh()});
 
