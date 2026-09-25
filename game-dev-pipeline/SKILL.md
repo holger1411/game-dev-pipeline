@@ -9,6 +9,14 @@ description: Use when starting, planning, or building a video game (browser thre
 
 Distilled from four real game prototypes (a 3D browser kart racer, a 2D isometric tactics game, a 3D browser tower-defense, a 2D pixel-art ARPG). **Core principle: Claude can only hit a look it can see.** So the look is fixed as images *before* code, every asset flows through a reproducible pipeline, and graphics are iterated against those images until they match.
 
+## Iterative by design (tell the user)
+
+Every result is **one round of an iterative process, not the end product**. The first playable, the first asset pass and every vision-loop batch are starting points that the next rounds improve. Say this explicitly whenever you hand something over, e.g.: "This is round 1, not the final result. You can step in now (play it, give notes, change direction) or let me keep going on my own for N more rounds."
+
+The user chooses how much they want to be involved:
+- **Hands-on** (default): small batches (3 rounds), and after each batch a checkpoint where they can play and steer. Stepping in is an offer, not a duty: "looks fine, continue" is a valid answer.
+- **Hands-off**: a large budget without checkpoints ("do 100 rounds without me"). Claude then runs through and reports at the end. It only stops early for things only the user can decide: the credit budget is used up, gameplay invariants break and can't be fixed, or a direction question that changes the game.
+
 ## Free first
 
 Everything must be possible **without paid accounts**. Paid services (kie.ai, Meshy, ElevenLabs) are optional upgrades that Claude *suggests* when the user wants more quality or speed. They are never a requirement. Per asset type, start with the free path in [asset-pipeline.md](references/asset-pipeline.md) → "Free path vs upgrade". 3D models, rigs and animations: build a first version in Blender (script). If the user wants more detail or more natural motion, suggest Meshy.
@@ -24,7 +32,7 @@ Everything must be possible **without paid accounts**. Paid services (kie.ai, Me
 | 4 | **Engine choice** (three.js for 3D browser, Phaser 4/Pixi for 2D browser, else Godot; Unreal/Unity only for a reason) | Decision in CLAUDE.md | [engine-choice.md](references/engine-choice.md) |
 | 5 | **Plan + build**: plan → build task by task (superpowers skills if installed). **Prove fun first** with a greybox; gameplay contract (`render_game_to_text`, `advanceTime`, invariant tests), tuning panel, game feel | Playable vertical slice + passing invariants | [engineering.md](references/engineering.md), [game-feel.md](references/game-feel.md) |
 | 6 | **Assets**: libraries first, then generate (kie.ai images + Suno music, Meshy 3D, ElevenLabs voice/SFX, Blender: script, MCP or hybrid, see the method table) | Assets + provenance JSON | [asset-pipeline.md](references/asset-pipeline.md) |
-| 7 | **Vision loop**: this skill's own iteration machinery. It iterates against the user's vision (`art/target/` + moodboard) for a **fixed round budget** (e.g. 5 or 10), with no stopping inside the budget, then a human playtest checkpoint | Rounds with scores, M-defects, STATE.md | [quality-loop.md](references/quality-loop.md) |
+| 7 | **Vision loop**: this skill's own iteration machinery. It iterates against the user's vision (`art/target/` + moodboard) for a **fixed round budget** (default 3; ask, since each round costs time and tokens), with no stopping inside the budget, then a human playtest checkpoint (unless the user chose hands-off) | Rounds with scores, M-defects, STATE.md | [quality-loop.md](references/quality-loop.md) |
 | 8 | **Ship**: build, deploy (web/itch/Steam), release checklist, AI disclosure from provenance | Published build | [shipping.md](references/shipping.md) |
 
 Phases 1–3 can be short (an hour), but they come first. Keep pre-code docs light: extra documents buy traceability, not a better game. 5–7 repeat.

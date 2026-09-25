@@ -5,8 +5,9 @@ This skill's own iteration machinery. It is inspired by the gauntlet-loop idea (
 ## Start: set aim + round budget
 
 Ask once (skip what the user already said):
-1. **Round budget**: how many rounds? (typical: 5 or 10; batches like "3, then show me")
-2. **Scope**: which views/areas (e.g. "forest level + HUD")?
+1. **Round budget**: how many rounds? **Default: 3.** Say the trade-off when asking: every round brings the game closer to the game concept and the moodboard, but costs time and tokens. Offer the default plus larger options (e.g. 3 / 5 / 10, or batches like "3, then show me")
+2. **Involvement**: hands-on (checkpoint after each batch; the user may step in but doesn't have to) or hands-off (run the whole budget, e.g. "100 rounds without me", report at the end). See SKILL.md → "Iterative by design"
+3. **Scope**: which views/areas (e.g. "forest level + HUD")?
 
 Then write the aim into `docs/vision-loop/AIM.md` and run:
 > "Keep improving until in-game frames are indistinguishable in quality and mood from `art/target/*.png` and the moodboard (`moodboard/_digest/MOODBOARD.md`). Optional second anchor: <reference game>. Budget: **N rounds**. Don't lower the bar."
@@ -30,7 +31,7 @@ State lives in files, so a round survives context resets and new sessions:
 
 **Keep the tooling lean** (harnesses can eat the budget): one small evidence script, one round note per round, and no framework. The game must stay playable at all times.
 
-**Looks ≠ feel.** The loop judges frames. After every batch there is a **human playtest checkpoint**: the user plays the build for a few minutes, and their notes feed the next rounds (feel, pacing, controls; see game-feel.md). Gameplay invariants (engineering.md) must pass before a round counts.
+**Looks ≠ feel.** The loop judges frames. After every batch there is a **human playtest checkpoint** (hands-on mode): the user plays the build for a few minutes, and their notes feed the next rounds (feel, pacing, controls; see game-feel.md). Frame it as an offer to steer, and remind them it is an intermediate state, not the result. In hands-off mode the checkpoint moves to the end of the whole budget. Gameplay invariants (engineering.md) must pass before a round counts.
 
 ## Preconditions (build these before round 1)
 
@@ -60,7 +61,7 @@ capture views ─► validate shots ─► blind critic (vs targets) ─► defe
 6. **Verify alone**: stop other browsers, measure fps on the real GPU, re-capture, confirm last round's M-items are fixed, and commit (one branch per round if the user reviews rounds).
 7. **Write `docs/vision-loop/round-NN.md`** (scores, M-list, what changed) and update `HANDOFF.md` so another session can resume.
 
-After round N: summary (score trend per axis, before/after sheet next to the targets, open M-items), then the playtest checkpoint and a new budget.
+After round N: summary (score trend per axis, before/after sheet next to the targets, open M-items), then the playtest checkpoint and a new budget. Say where the game stands on the way to the vision and what the next rounds would improve, so the user sees it as a step, not a verdict.
 
 ## What moves the score most (measured across projects)
 

@@ -2,6 +2,8 @@
 
 A Claude Code skill (it also works with other agents that read `SKILL.md` skills) for building video games with AI coding agents. It covers the whole path from **moodboard to a polished build**: lock the look as images first, produce assets through reproducible pipelines, then iterate the graphics against those images until they match.
 
+**It works iteratively.** The first playable is round 1, not the final result. After each small batch of rounds you can step in (play, give notes, change direction) or just say "continue". If you'd rather not be involved, give it a large budget ("do 100 rounds without me") and it reports back at the end.
+
 It comes from four real game prototypes: a 3D browser kart racer, a 2D isometric tactics game, a 3D browser tower-defense, and a 2D pixel-art ARPG.
 
 ## Workflow
@@ -13,7 +15,7 @@ It comes from four real game prototypes: a 3D browser kart racer, a 2D isometric
 4. **Engine choice**: three.js (3D browser), Phaser/PixiJS (2D browser), Godot (default otherwise), Unreal/Unity when justified
 5. **Plan + build**: prove fun first (greybox), gameplay test contract, tuning panel, game feel
 6. **Assets**: free libraries first, then kie.ai (images, Suno music), Meshy (3D, rigging, animation), ElevenLabs (voice, SFX), Blender Python scripts (headless)
-7. **Vision loop**: iterate against *your* vision (moodboard + targets) for a fixed round budget (e.g. 5 or 10): blind critic, measured defects, parallel fixers, then a human playtest
+7. **Vision loop**: iterate against *your* vision (moodboard + targets) for a fixed round budget (default 3): blind critic, measured defects, parallel fixers, then a human playtest
 8. **Ship**: web/itch/Steam deploy, release checklist, AI-content disclosure from provenance
 
 ## Contents
