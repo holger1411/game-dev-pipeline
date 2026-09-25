@@ -12,10 +12,22 @@
 - **Placeholders for everything**: a missing texture becomes a magenta placeholder, a missing GLB becomes a box, a missing portrait a procedural bust. The game never crashes on a missing asset.
 - Audio: procedural WebAudio baseline (master → compressor → sfx/music buses; oscillators + noise for SFX; drones for music), replaced by files as they arrive. Nothing plays before a user gesture; audio calls never throw.
 
+## Gameplay verification contract (a gate before vision-loop rounds)
+
+The agent must be able to check *gameplay* without screenshots:
+- `window.render_game_to_text()` returns compact JSON of what matters: mode/scene, player pos/hp/score, enemies, objectives, and the last events.
+- `window.advanceTime(ms)` steps the simulation deterministically (fixed tick), so tests don't depend on real time.
+- An **input-burst** helper sends scripted inputs (hold right 500 ms, jump, fire ×3) through the real input layer.
+- **Invariant tests** (Playwright or headless): the game boots to playable; the player can score/progress; the player can fail (die/lose); retry/restart works; no softlock (a bot can always make progress within X s); no console errors.
+- Bot playtest for balance: time-to-first-fail and difficulty at two reaction delays. Bots with perfect micro beat humans, so the final tuning is done by a human.
+
+Godot equivalent: an autoload that prints state JSON on a command-line flag, `--fixed-fps` for deterministic stepping, and GdUnit4 tests.
+
 ## Debug and test hooks (needed by the quality loop)
 
 - `window.__game` (name it per project): `ready`, `state()`, `stats` (fps, draw calls, triangles, loaded asset list: an empty list is a wiring bug), cheats (`tp`, `god`, `killAll`), `view(x,z,dist,pitch,yaw)`.
 - URL params: `?seed= &autopilot=1 &skip=<scene> &players= &debug=1 &hud=0 &quality=`.
+- **Tuning panel** `?tune=1`: sliders for feel/balance numbers, written to `src/data/*.json`. Also small **in-game editors** (level layout, camera paths, waves) instead of prompt-tweaking.
 - Single-asset viewer pages (e.g. `tools-pages/modelview.html?az=&el=&dist=`) for checking one model or sprite in isolation.
 - Dev server: fixed `PORT` env with `strictPort`, so parallel worktrees/agents each get their own port. Use `127.0.0.1`, not `localhost` (another project answered on `::1`).
 
@@ -44,6 +56,14 @@ Tool scripts (Python/Blender) get `--self-test` and run inside the test suite. A
 - Global fog/weather via overridden `ShaderChunk`s + shared uniform arrays, so one update reaches every material.
 - Black frame after resize/quality change = incomplete framebuffer: recreate render targets.
 - Headless Chrome can't prove 60 fps: measure in a real browser.
+
+## Checklists (as soon as the core loop is fun)
+
+- **Input**: keyboard + gamepad (Gamepad API / engine input map) + touch if web/mobile (virtual stick, big buttons); rebinding; F = fullscreen; pause on focus loss.
+- **Save**: versioned save format (`{version, data}` + migrations), autosave at checkpoints, and a corrupt-save fallback. Test loading an old save after a version bump.
+- **Accessibility**: separate volume sliders, subtitles for voice, reduced shake/flash, colour never the only signal, remappable controls, readable font size.
+- **Audio mix** (starting values, linear gain): music 0.10–0.2 during gameplay (duck by ~40 % under voice), SFX 0.2–0.35, UI 0.15–0.25, voice 0.6–0.8; loudness-normalise the files first.
+- **Localisation**: all text from keyed data files from day one.
 
 ## Multi-agent working rules
 

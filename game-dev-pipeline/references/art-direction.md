@@ -58,7 +58,7 @@ Camera: <FOV/angle/height>. Internal resolution: <e.g. 1280x720, integer scaling
 Palette: <hex ramps, max N colours for pixel art>; value structure: <low-key/high-key>
 Lighting: key:fill ≈ <5:1>, sun colour <#ffc585>, sky fill <#8fa9c8>, fog/haze colour = sky horizon
 Materials: <PBR / flat / toon>; roughness range; no pure black, no pure white
-Readability (non-negotiable): silhouettes, player/enemy contrast vs ground ≥ <measured>,
+Readability (non-negotiable): minimum luma contrast player/HUD vs background = <measured>, silhouettes, player/enemy contrast vs ground ≥ <measured>,
   colour never the only signal, HUD never washed out by bloom
 Style don'ts: <e.g. no lime greens, no plastic specular, no mixed tree styles>
 ```

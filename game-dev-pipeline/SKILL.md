@@ -20,13 +20,14 @@ Everything must be possible **without paid accounts**. Paid services (kie.ai, Me
 | 0 | **Setup**: create `moodboard/`, `story/`, `art/`; start the board; check tools + API keys | Folders, board link, `.env.example` | [moodboard.md](references/moodboard.md) |
 | 1 | **Moodboard**: the user drops anything in (images, screenshots, videos, music, colours, notes); Claude digests it | `moodboard/_digest/MOODBOARD.md`, `palette.json` | [moodboard.md](references/moodboard.md) |
 | 2 | **Target screenshots + artboard + art bible**: fake in-game screenshots (image model of the user's choice, currently ChatGPT/Gemini lead) approved by the user. No targets? Name 1–3 reference games | `art/target/*.png`, `art/ART_BIBLE.md` | [art-direction.md](references/art-direction.md) |
-| 3 | **Story**: pitch, story bible, characters | `story/*.md` | [story.md](references/story.md) |
-| 4 | **Engine choice** (three.js for 3D browser, Phaser/Pixi for 2D browser, else Godot; Unreal/Unity only for a reason) | Decision in CLAUDE.md | [engine-choice.md](references/engine-choice.md) |
-| 5 | **Plan + build**: design doc → plan → build task by task (superpowers skills if installed); sim/render split, debug hooks, placeholders | Playable vertical slice | [engineering.md](references/engineering.md) |
+| 3 | **Game one-pager + story**: core loop, verbs, win/lose, scope; story bible, characters (keep it light) | `docs/GAME.md`, `story/*.md` | [story.md](references/story.md) |
+| 4 | **Engine choice** (three.js for 3D browser, Phaser 4/Pixi for 2D browser, else Godot; Unreal/Unity only for a reason) | Decision in CLAUDE.md | [engine-choice.md](references/engine-choice.md) |
+| 5 | **Plan + build**: plan → build task by task (superpowers skills if installed). **Prove fun first** with a greybox; gameplay contract (`render_game_to_text`, `advanceTime`, invariant tests), tuning panel, game feel | Playable vertical slice + passing invariants | [engineering.md](references/engineering.md), [game-feel.md](references/game-feel.md) |
 | 6 | **Assets**: libraries first, then generate (kie.ai images + Suno music, Meshy 3D, ElevenLabs voice/SFX, Blender: script, MCP or hybrid, see the method table) | Assets + provenance JSON | [asset-pipeline.md](references/asset-pipeline.md) |
-| 7 | **Quality loop**: iterate (gauntlet-loop if installed) against `art/target/` + moodboard until indistinguishable | Rounds with scores, M-defects | [quality-loop.md](references/quality-loop.md) |
+| 7 | **Vision loop**: this skill's own iteration machinery. It iterates against the user's vision (`art/target/` + moodboard) for a **fixed round budget** (e.g. 5 or 10), with no stopping inside the budget, then a human playtest checkpoint | Rounds with scores, M-defects, STATE.md | [quality-loop.md](references/quality-loop.md) |
+| 8 | **Ship**: build, deploy (web/itch/Steam), release checklist, AI disclosure from provenance | Published build | [shipping.md](references/shipping.md) |
 
-Phases 1–3 can be short (an hour), but they come first. 6 and 7 repeat.
+Phases 1–3 can be short (an hour), but they come first. Keep pre-code docs light: extra documents buy traceability, not a better game. 5–7 repeat.
 
 **Under time pressure** ("I want to play tonight"): run phases 1–3 in parallel with a placeholder vertical slice (boxes, procedural textures, WebAudio). Gate: **no generated assets and no visual polish before the user has approved the targets** (or named reference games). The first playable is one core loop on one map.
 
@@ -49,11 +50,12 @@ Phases 1–3 can be short (an hour), but they come first. 6 and 7 repeat.
 - A game asset that exists only as a hand-edited `.blend`, when it will need re-exports, variants or budget changes later (script or hybrid would keep it rebuildable)
 - Generating a texture/SFX that a CC0 library already has
 - A quality round without blind pairs, measured numbers, or a fixed view set
+- Asking "shall I continue?" inside an agreed round budget, or stopping early because it "looks good now"
+- Polishing visuals while the core loop isn't fun yet, or counting a round whose gameplay invariants fail
 - Declaring the look "done" without the user comparing it to the targets
 
 ## Related skills
 
 Optional, used when installed (the skill works without them):
 - **superpowers** (github.com/obra/superpowers): brainstorming, writing-plans, subagent-driven-development, systematic-debugging, verification-before-completion. Without it: write a short design doc and a task plan in `docs/`, then build task by task with tests.
-- **gauntlet-loop**: the aim prompt + harsh critic + blind A/B loop. Without it: follow [quality-loop.md](references/quality-loop.md) directly; it is self-contained.
 - **playwright-cli** or Playwright MCP for screenshots; plain Playwright scripts work too.

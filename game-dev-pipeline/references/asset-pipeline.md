@@ -23,7 +23,7 @@
 | Target screenshots, concept, artboard | ChatGPT image / kie.ai image models | Midjourney (`--sref` for style lock) |
 | Tileable textures (ground, walls, facades) | **Free libraries** (ambientCG, Poly Haven), else kie.ai image + make tileable | Procedural Canvas2D/shader textures (two prototypes shipped with zero texture files) |
 | Backgrounds, skyboxes, portraits, icons, UI art | **kie.ai image** (model of the user's choice, see above) | Poly Haven HDRIs for skies |
-| 2D sprites (characters, monsters, items) | kie.ai image → chroma key → palette quantize | Image → Meshy 3D → Blender render to 8 directions |
+| 2D sprites (characters, monsters, items) | kie.ai image → chroma key → palette quantize (paid upgrade for pixel art: PixelLab MCP for 4/8-direction characters, animations, tilesets) | Image → Meshy 3D → Blender render to 8 directions |
 | 3D props / buildings / vehicles | **Blender Python script** (bmesh, headless) | Kenney / Quaternius / Poly Pizza (CC0), Poly Haven models |
 | 3D characters / creatures | **Blender first version** (script: mesh, armature, walk/idle) | Upgrade: kie.ai concept → Meshy image-to-3D → remesh → rig → animate; free: Quaternius/Kenney rigged packs, Mixamo |
 | Improving an existing 3D model | **Meshy** remesh / retexture / rigging / animation | Blender scripts (decimate, UV, bake) |
@@ -153,7 +153,8 @@ Rules for all three:
 - MCP/GUI work: never open files by hand in the GUI while an agent works in it.
 
 Script checklist (script and hybrid):
-- Build from `bmesh` primitives / modifiers; name objects deterministically.
+- Build in steps and **render a quick preview after each major step** (massing → openings → details → materials), not only at the end. A blind script is the method's main weakness.
+- Build from `bmesh` primitives / modifiers; name objects deterministically. Assembly rules: plan the parts and their connection points before geometry; beams/struts as bmesh boxes rather than rotated cylinders; parts that touch overlap slightly (a few mm) instead of kissing; remember `primitive_cube_add(size=2)` is 2 m.
 - Document the **axis convention** (glTF is +Y up; export with `export_yup=True`; decide what "forward" is).
 - **Budgets that abort the build**: triangle count per model, file size per GLB (e.g. 3k tris kart, 1.5 MB per landmark).
 - Export GLB with Draco (`export_draco_mesh_compression_enable=True`); copy the Draco decoder into the web app.

@@ -1,3 +1,23 @@
+# Game one-pager + story
+
+## docs/GAME.md (one page, before code)
+
+```markdown
+# <Game>
+Fantasy: <one sentence: what the player gets to be/do>
+Core loop: <verb → reward → escalation, e.g. explore → loot → upgrade → harder zone>
+Player verbs: <move, jump, shoot, build, …>
+Win / lose: <conditions>
+Session length / platform / input: <…>
+Scope v1 (first playable): <one map, 3 enemies, 1 boss, …>
+Backlog (later): <…>
+Open questions: <…>
+```
+
+- **Prove fun first**: for mechanics-driven games, greybox the core loop before any art (placeholders only). Art and the vision loop come after the first playable.
+- **Keep pre-code docs light**: GAME.md, the moodboard digest, the targets and a short story bible are enough. A comparison of AI game-studio setups found the variant that wrote ~30 documents before any code ranked last in blind review and human playtests. Documents bought traceability, not a better game.
+- One feature per session; update the backlog in GAME.md.
+
 # Story: story/ folder
 
 Story lives in Markdown in `story/`. The user edits it directly or on the board (`board/board.mjs`), and Claude reads it before writing dialogue, quests, level beats, item texts, voice lines, or cutscene prompts.
