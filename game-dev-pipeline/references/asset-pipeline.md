@@ -129,18 +129,30 @@ POST https://api.elevenlabs.io/v1/sound-generation?output_format=mp3_44100_96
 - Some sounds generate badly (an engine loop "sounded like rattling cups"). Synthesize those instead (WebAudio oscillators + filters, pitch from RPM).
 - Runtime: nothing plays before a user gesture (browser audio unlock); audio methods never throw; synth fallback while files load.
 
-## Blender: Python scripts, headless (no Blender MCP)
+## Blender: three methods
 
-Blender must be installed locally: macOS `/Applications/Blender.app/Contents/MacOS/Blender`, Windows `C:\Program Files\Blender Foundation\Blender <ver>\blender.exe`, Linux `blender` on PATH. Store the path in `BLENDER` env if it isn't on PATH. Claude writes `tools/blender/*.py` and runs them:
+Blender must be installed locally: macOS `/Applications/Blender.app/Contents/MacOS/Blender`, Windows `C:\Program Files\Blender Foundation\Blender <ver>\blender.exe`, Linux `blender` on PATH. Store the path in `BLENDER` env if it isn't on PATH.
 
-```bash
-"${BLENDER:-blender}" --background --factory-startup --python tools/blender/build-kart.py -- --out public/assets/kart.glb
-```
-(Arguments after `--` are read in the script with `sys.argv[sys.argv.index("--")+1:]`.)
+| Method | How | Strengths | Weaknesses |
+|---|---|---|---|
+| **Script** (headless) | Claude writes `tools/blender/*.py` and runs `"${BLENDER:-blender}" --background --factory-startup --python x.py -- <args>` | Reproducible and diffable; rebuild variants/LODs/budgets anytime; cheapest (≈2.5× fewer tokens); fastest; most architectural detail; the smoothest, most organic **animation** in tests; runs in parallel/CI | Blind until each render; fixes cost a full rebuild; framing and material mistakes show up late; less "lively" look without deliberate material work |
+| **MCP** (live GUI) | Blender GUI + Blender MCP server; Claude builds via `execute_blender_code`, checks with viewport screenshots, ray casts, object info | Sees the scene live; organic shapes; the **character model** looked more human; livelier materials/lighting; the user can watch and step in | ≈2.5× the tokens; the result exists only as a `.blend` (not rebuildable); helpers are lost between calls; boolean cuts fail silently; the viewport ≠ the render; one GUI = one agent; files opened by hand in the GUI wipe unsaved work |
+| **Hybrid** | The script is the source of truth; it is executed inside the live GUI via MCP (`exec(open(path).read())`) for inspection and look-dev; every kept change goes back into the script; final assets come from a clean headless run | Combines both: more detail *and* more organic in tests, the fewest triangles, reproducible; MCP inspection catches lighting, framing, clipping and material problems a blind script misses | Tokens ≈ MCP; slowest (edit → re-exec loop); needs the GUI (one agent at a time) |
 
-Why scripts, not the MCP: reproducible (committed, re-runnable in CI), diffable, no live-session state, can run in parallel, and builds can fail loudly on budgets.
+Measured in one run per method (church: script 16 min / 3.9 M tokens / 38k tris, MCP 19 min / 9.5 M / 17k, hybrid 23 min / 9.4 M / 11k; walking human: script had the more fluid animation, MCP the more human-looking model). This is n=1 per task, so treat it as guidance, not a law.
 
-Script checklist:
+**Choosing:**
+- Many assets, variants, LODs, CI rebuilds, animation, a tight token budget → **script**
+- A hero asset where look matters and it must stay rebuildable → **hybrid**
+- A quick one-off, organic sculpting, or the user wants to watch and step in → **MCP** (save to the project after every step; if it goes into the game, port it to a script later)
+- If unsure, state the trade-off in one line and let the user pick.
+
+Rules for all three:
+- **Bake procedural materials to textures before glTF export.** Node-based procedural textures don't survive export; in tests every arm shipped flat base colours.
+- **Make materials look lively on purpose:** 2–3 variants per surface type, weathering driven by AO/height/curvature, irregular stones/tiles instead of a regular brick pattern, and no perfectly even colours. This was the main visual advantage of the MCP runs, and a script can do it too.
+- MCP/GUI work: never open files by hand in the GUI while an agent works in it.
+
+Script checklist (script and hybrid):
 - Build from `bmesh` primitives / modifiers; name objects deterministically.
 - Document the **axis convention** (glTF is +Y up; export with `export_yup=True`; decide what "forward" is).
 - **Budgets that abort the build**: triangle count per model, file size per GLB (e.g. 3k tris kart, 1.5 MB per landmark).

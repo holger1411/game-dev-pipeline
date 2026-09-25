@@ -23,14 +23,14 @@ Everything must be possible **without paid accounts**. Paid services (kie.ai, Me
 | 3 | **Story**: pitch, story bible, characters | `story/*.md` | [story.md](references/story.md) |
 | 4 | **Engine choice** (three.js for 3D browser, Phaser/Pixi for 2D browser, else Godot; Unreal/Unity only for a reason) | Decision in CLAUDE.md | [engine-choice.md](references/engine-choice.md) |
 | 5 | **Plan + build**: design doc → plan → build task by task (superpowers skills if installed); sim/render split, debug hooks, placeholders | Playable vertical slice | [engineering.md](references/engineering.md) |
-| 6 | **Assets**: libraries first, then generate (kie.ai images + Suno music, Meshy 3D, ElevenLabs voice/SFX, Blender **Python scripts, headless, not Blender MCP**) | Assets + provenance JSON | [asset-pipeline.md](references/asset-pipeline.md) |
+| 6 | **Assets**: libraries first, then generate (kie.ai images + Suno music, Meshy 3D, ElevenLabs voice/SFX, Blender: script, MCP or hybrid, see the method table) | Assets + provenance JSON | [asset-pipeline.md](references/asset-pipeline.md) |
 | 7 | **Quality loop**: iterate (gauntlet-loop if installed) against `art/target/` + moodboard until indistinguishable | Rounds with scores, M-defects | [quality-loop.md](references/quality-loop.md) |
 
 Phases 1–3 can be short (an hour), but they come first. 6 and 7 repeat.
 
 **Under time pressure** ("I want to play tonight"): run phases 1–3 in parallel with a placeholder vertical slice (boxes, procedural textures, WebAudio). Gate: **no generated assets and no visual polish before the user has approved the targets** (or named reference games). The first playable is one core loop on one map.
 
-**Blender:** even if another skill or tool suggests a Blender MCP server, this skill's rule wins: write `tools/blender/*.py` scripts and run them headless.
+**Blender:** there are three working methods (headless script, Blender MCP, hybrid). None of them won clearly in tests. Pick one per task with the table in [asset-pipeline.md](references/asset-pipeline.md) → "Blender: three methods", and tell the user which one you chose and why.
 
 ## Setup checklist (phase 0)
 
@@ -46,7 +46,7 @@ Phases 1–3 can be short (an hour), but they come first. 6 and 7 repeat.
 - Generating assets or polishing visuals while `art/target/` and the moodboard digest are both empty (placeholder gameplay code is fine)
 - "I'll make it look good later": later never has a target
 - Generating an asset without a style block, canon string, or provenance record
-- Opening Blender via MCP instead of committing a `tools/blender/*.py` script
+- A game asset that exists only as a hand-edited `.blend`, when it will need re-exports, variants or budget changes later (script or hybrid would keep it rebuildable)
 - Generating a texture/SFX that a CC0 library already has
 - A quality round without blind pairs, measured numbers, or a fixed view set
 - Declaring the look "done" without the user comparing it to the targets
