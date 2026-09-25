@@ -9,6 +9,10 @@ description: Use when starting, planning, or building a video game (browser thre
 
 Distilled from four real game prototypes (a 3D browser kart racer, a 2D isometric tactics game, a 3D browser tower-defense, a 2D pixel-art ARPG). **Core principle: Claude can only hit a look it can see.** So the look is fixed as images *before* code, every asset flows through a reproducible pipeline, and graphics are iterated against those images until they match.
 
+## Free first
+
+Everything must be possible **without paid accounts**. Paid services (kie.ai, Meshy, ElevenLabs) are optional upgrades that Claude *suggests* when the user wants more quality or speed. They are never a requirement. Per asset type, start with the free path in [asset-pipeline.md](references/asset-pipeline.md) → "Free path vs upgrade". 3D models, rigs and animations: build a first version in Blender (script). If the user wants more detail or more natural motion, suggest Meshy.
+
 ## The order (don't skip ahead)
 
 | # | Phase | Output | Reference |
@@ -32,7 +36,7 @@ Phases 1–3 can be short (an hour), but they come first. 6 and 7 repeat.
 
 - `node <skill-dir>/board/board.mjs . --open` (run in background; `<skill-dir>` = the folder containing this SKILL.md, shown as "Base directory" when the skill loads): a local board showing moodboard, story (editable Markdown), targets, colours, video, audio.
 - Tools: Node 18+, Python 3 + Pillow/numpy, **ffmpeg**, **Blender** (desktop app, run as `blender --background --python`), Playwright (or playwright-cli), git. Check each with `--version`; if missing, give the user the install command for their OS (macOS `brew install ffmpeg`, Windows `winget install ffmpeg`, Linux package manager; Blender from blender.org).
-- Keys in `.env.local` (gitignored): `KIE_API_KEY`, `MESHY_API_KEY`, `ELEVENLABS_API_KEY`. Ask the user to paste them into the file themselves; never print them. Verify with the balance endpoints. Ask for a **credit budget** and log spend in `docs/HANDOFF.md`.
+- Optional keys in `.env.local` (gitignored), only if the user has these accounts: `KIE_API_KEY`, `MESHY_API_KEY`, `ELEVENLABS_API_KEY`. Without keys, use the free paths. With keys: ask the user to paste them into the file themselves; never print them. Verify with the balance endpoints. Ask for a **credit budget** and log spend in `docs/HANDOFF.md`.
 - API model ids and fields change: before the first call to any service, check its current docs (docs.kie.ai, docs.meshy.ai/llms-full.txt, elevenlabs.io/docs). The references give proven shapes, not guarantees.
 - Voice/dialogue language = the game's UI language; ask if unclear.
 - Project CLAUDE.md: engine, art-bible link, folder map, debug hooks, budgets.

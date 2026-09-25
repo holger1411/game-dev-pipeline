@@ -39,7 +39,7 @@ ln -s ~/game-dev-pipeline-repo/game-dev-pipeline ~/.claude/skills/game-dev-pipel
 ```
 
 **Requirements:** Node 18+, Python 3 with Pillow and numpy, ffmpeg, Blender, and Playwright.
-**Optional services** (bring your own keys): kie.ai, Meshy, ElevenLabs.
+**Optional paid services** (bring your own keys, never required; every step has a free path): kie.ai, Meshy, ElevenLabs.
 **Optional skills:** [superpowers](https://github.com/obra/superpowers) and a gauntlet-style quality loop skill. The skill works without them.
 
 ## The board

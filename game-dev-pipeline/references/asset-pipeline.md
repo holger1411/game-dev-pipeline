@@ -4,6 +4,18 @@
 
 **The user picks the image model; it's their call and models improve constantly.** Experience so far: the **ChatGPT (GPT Image)** and **Google Gemini (Nano Banana)** families give the best results, ChatGPT currently ahead. That ranking changes, so ask the user which model to use (or suggest the current leader), record it in `art/ART_BIBLE.md`, and keep it for all assets of one kind so the style stays consistent. kie.ai offers most of these through one API, so switching is just a different `model` id. When a new model appears, compare it with a small A/B batch before switching mid-project.
 
+## Free path vs upgrade
+
+| Asset | Free path (default) | Paid upgrade (suggest, don't require) |
+|---|---|---|
+| Target screenshots, concept, 2D art | Free tiers of ChatGPT / Gemini in the browser (the user downloads the images into `art/`); local Stable Diffusion / ComfyUI if the user has a GPU | kie.ai API (batch, automation, many models) |
+| Textures, HDRIs | ambientCG, Poly Haven (CC0); procedural Canvas/shader/Blender textures | kie.ai image + make tileable |
+| 3D props, buildings, vehicles | Blender Python scripts; Kenney, Quaternius, Poly Pizza (CC0) | Meshy image/text-to-3D, remesh, retexture |
+| Characters, rigs, animations | Blender: script-built mesh + own armature (or Rigify) + procedural/keyframed animation; Quaternius/Kenney rigged packs; Mixamo (free account) | **Meshy** rigging + animation library, when more detail or more natural motion is wanted |
+| Music | OpenGameArt, Pixabay Music, freesound (CC0/CC-BY); procedural WebAudio | kie.ai Suno |
+| SFX | Kenney audio, freesound CC0, Sonniss GDC bundles; jsfxr/procedural WebAudio | ElevenLabs sound generation |
+| Voice | Text bubbles; local open-source TTS (e.g. Piper); OS voices (macOS `say`) for placeholders | ElevenLabs TTS |
+
 ## Decision table: where does each asset come from?
 
 | Asset | First choice | Alternatives |
@@ -13,7 +25,7 @@
 | Backgrounds, skyboxes, portraits, icons, UI art | **kie.ai image** (model of the user's choice, see above) | Poly Haven HDRIs for skies |
 | 2D sprites (characters, monsters, items) | kie.ai image → chroma key → palette quantize | Image → Meshy 3D → Blender render to 8 directions |
 | 3D props / buildings / vehicles | **Blender Python script** (bmesh, headless) | Kenney / Quaternius / Poly Pizza (CC0), Poly Haven models |
-| 3D characters / creatures | kie.ai concept → **Meshy image-to-3D** → remesh → rig → animate | Quaternius/Kenney rigged packs, Mixamo animations |
+| 3D characters / creatures | **Blender first version** (script: mesh, armature, walk/idle) | Upgrade: kie.ai concept → Meshy image-to-3D → remesh → rig → animate; free: Quaternius/Kenney rigged packs, Mixamo |
 | Improving an existing 3D model | **Meshy** remesh / retexture / rigging / animation | Blender scripts (decimate, UV, bake) |
 | Music | **kie.ai Suno API** (instrumental) | Free libraries (OpenGameArt, Pixabay Music) |
 | SFX | **Libraries first** (Kenney audio, freesound CC0, Sonniss GDC bundles), then **ElevenLabs sound-generation** | Synthesized WebAudio (engine sounds, UI blips) |
